@@ -1,9 +1,14 @@
-NodeJS bitcoin.de API
-===========
+# NodeJS bitcoin.de API
 
 NodeJS Client Library for the [bitcoin.de](https://www.bitcoin.de/de) Trading API
 
-Example Usage:
+## Installation
+
+```
+npm install bitcoinde-api
+```
+
+## Example Usage
 
 ```javascript
 var BitcoindeClient = require('bitcoinde-api');
@@ -33,7 +38,7 @@ bitcoinde.on('error', function(error) {
 });
 ```
 
-Note:
+**Note**
 
 > ... if an 'error' event handler is not provided, the error will be thrown, causing the Node.js process to report an unhandled exception and crash ...
 
