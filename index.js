@@ -130,7 +130,7 @@ function BitcoindeClient(key, secret) {
                 if(data.errors && data.errors.length) {
                     err = new Error('Bitcoin.de API returned error: '+data.errors[0].message);
                     self.emit('error', err);
-					return callback.call(self, err, data.errors);
+                    return callback.call(self, err, data.errors);
                 } else {
                     return callback.call(self, null, data);
                 }
