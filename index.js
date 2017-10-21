@@ -14,7 +14,7 @@ function BitcoindeClient(key, secret) {
 
     var config = {
         url: 'https://api.bitcoin.de',
-        version: 'v1',
+        version: 'v2',
         agent: 'Bitcoin.de NodeJS API Client',
         key: key,
         secret: secret,
@@ -156,8 +156,8 @@ function BitcoindeClient(key, secret) {
             this.last    = now;
 
             // add padding to nonce
-            var padding = 
-                this.counter < 10 ? '000' : 
+            var padding =
+                this.counter < 10 ? '000' :
                     this.counter < 100 ? '00' :
                         this.counter < 1000 ?  '0' : '';
 
