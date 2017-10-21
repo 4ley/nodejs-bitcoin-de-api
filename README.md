@@ -12,7 +12,10 @@ npm install bitcoinde-api
 
 ```javascript
 var BitcoindeClient = require('bitcoinde-api');
-var bitcoinde = new BitcoindeClient('api_key', 'api_secret');
+var bitcoinde = new BitcoindeClient({
+  key: 'api_key',
+  secret: 'api_secret'
+});
 
 // Orderbook
 bitcoinde.get('orders', { type: 'sell' }, function(error, result) {
