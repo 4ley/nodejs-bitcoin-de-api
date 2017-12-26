@@ -11,7 +11,8 @@
   ],
   "author": "Aley R. (https://github.com/4ley)",
   "contributors": [
-    "Alexander Wunschik <dev@wunschik.net>"
+    "Alexander Wunschik <dev@wunschik.net>",
+    "Sven Neuhaus <sven-github@sven.de>"
   ],
   "license": "MIT",
   "dependencies": {

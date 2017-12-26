@@ -83,7 +83,9 @@ function BitcoindeClient(settings) {
                 case 'post':
                     var queryParams = {};
                     Object.keys(params).sort().forEach(function(idx) { queryParams[idx] = params[idx]; });
-                    md5Query = crypto.createHash('md5').update(querystring.stringify(queryParams)).digest('hex');
+                    md5Query = crypto.createHash('md5')
+						.update(querystring.stringify(queryParams))
+						.digest('hex');
                     options.form = queryParams;
 					options.method = 'POST';
                     break;
@@ -95,7 +97,7 @@ function BitcoindeClient(settings) {
 					options.method = 'DELETE';
                     break;
                 default:
-                    var err = new Error('Method ' +method+ ' not defined');
+                    var err = new Error('Method ' + method + ' not defined');
                     self.emit('error', err);
 					return new Promise((resolve, reject) => {
 						reject(err)
@@ -103,14 +105,14 @@ function BitcoindeClient(settings) {
             }
         }
 
-        var signature = crypto.createHmac('sha256', config.secret).update(
-            method.toUpperCase()+'#'+options.url+'#'+config.key+'#'+nonce+'#'+md5Query
-        ).digest('hex');
+        var signature = crypto.createHmac('sha256', config.secret)
+			.update([method.toUpperCase(), options.url, config.key, nonce, md5Query].join('#'))
+			.digest('hex');
 
         options.headers = {
-            'User-Agent': config.agent,
-            'X-API-KEY': config.key,
-            'X-API-NONCE': nonce,
+            'User-Agent'     : config.agent,
+            'X-API-KEY'      : config.key,
+            'X-API-NONCE'    : nonce,
             'X-API-SIGNATURE': signature
         };
 
@@ -140,7 +142,7 @@ function BitcoindeClient(settings) {
      */
     var noncer = new (function() {
 
-        // if you call Date.now() to fast it will generate
+        // if you call Date.now() too fast it will generate
         // the same ms, helper to make sure the nonce is
         // truly unique (supports up to 999 calls per ms).
         this.generate = function() {
