@@ -100,7 +100,7 @@ function BitcoindeClient(settings) {
 					return new Promise((resolve, reject) => {
 						let err = new Error('Method ' + method + ' not defined');
 						self.emit('error', err);
-						reject(err)
+						reject(err);
 					});
 			}
 		}
@@ -121,17 +121,17 @@ function BitcoindeClient(settings) {
 				.then((data) => {
 					if(data.errors && data.errors.length) {
 						// can we do something better with data.errors?
-						err = new Error('Bitcoin.de API returned error: '+data.errors[0].message);
+						let err = new Error('bitcoin.de API returned error: ' + data.errors[0].message);
 						self.emit('error', err);
-						reject(err)
+						reject(err);
 					} else {
-						resolve(data)
+						resolve(data);
 					}
 				})
 				.catch((error) => {
-					err = new Error('Error in server response: '+JSON.stringify(error));
+					let err = new Error('Error in server response: ' + JSON.stringify(error));
 					self.emit('error', err);
-					reject(err)
+					reject(err);
 				});
 
 		});
@@ -161,7 +161,7 @@ function BitcoindeClient(settings) {
 			return now + padding + this.counter;
 		};
 	})();
-};
+}
 
 util.inherits(BitcoindeClient, events.EventEmitter);
 
