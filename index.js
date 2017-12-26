@@ -23,51 +23,51 @@ function BitcoindeClient(settings) {
 	if (!config.key) self.emit('error', new Error('required settings "key" is missing'));
 	if (!config.secret) self.emit('error', new Error('required settings "secret" is missing'));
 
-    /**
-     * Initialize necessary properties from EventEmitter
-     */
+	/**
+	 * Initialize necessary properties from EventEmitter
+	 */
 	events.EventEmitter.call(self);
 
-    /**
-     * Perform GET API request
-     * @param  {String}   method   API method
-     * @param  {Object}   params   Arguments to pass to the api call
-     * @return {Object}            The request object
-     */
+	/**
+	 * Perform GET API request
+	 * @param  {String}   method   API method
+	 * @param  {Object}   params   Arguments to pass to the api call
+	 * @return {Object}            The request object
+	 */
 	self.get = function(method, params) {
 		var url = config.url+'/'+config.version+'/'+method;
 		return rawRequest('get', url, params);
 	};
 
-    /**
-     * Perform POST API request
-     * @param  {String}   method   API method
-     * @param  {Object}   params   Arguments to pass to the api call
-     * @return {Object}            The request object
-     */
-    self.post = function(method, params) {
-        var url = config.url+'/'+config.version+'/'+method;
-        return rawRequest('post', url, params);
-    };
+	/**
+	 * Perform POST API request
+	 * @param  {String}   method   API method
+	 * @param  {Object}   params   Arguments to pass to the api call
+	 * @return {Object}            The request object
+	 */
+	self.post = function(method, params) {
+		var url = config.url+'/'+config.version+'/'+method;
+		return rawRequest('post', url, params);
+	};
 
-    /**
-     * Perform DELETE API request
-     * @param  {String}   method   API method
-     * @param  {Object}   params   Arguments to pass to the api call
-     * @return {Object}            The request object
-     */
-    self.delete = function(method, params) {
-        var url = config.url+'/'+config.version+'/'+method;
-        return rawRequest('delete', url, params);
-    };
+	/**
+	 * Perform DELETE API request
+	 * @param  {String}   method   API method
+	 * @param  {Object}   params   Arguments to pass to the api call
+	 * @return {Object}            The request object
+	 */
+	self.delete = function(method, params) {
+		var url = config.url+'/'+config.version+'/'+method;
+		return rawRequest('delete', url, params);
+	};
 
-    /**
-     * Send the actual HTTP request
-     * @param  {String}   method   HTTP method
-     * @param  {String}   url      URL to request
-     * @param  {Object}   params   POST body
-     * @return {Object}            The request object
-     */
+	/**
+	 * Send the actual HTTP request
+	 * @param  {String}   method   HTTP method
+	 * @param  {String}   url      URL to request
+	 * @param  {Object}   params   POST body
+	 * @return {Object}            The request object
+	 */
 	var rawRequest = function(method, url, params) {
 
 		let nonce    = noncer.generate();
@@ -78,43 +78,43 @@ function BitcoindeClient(settings) {
 			json: true
 		};
 
-        if(params) {
-            switch(method) {
-                case 'post':
-                    var queryParams = {};
-                    Object.keys(params).sort().forEach(function(idx) { queryParams[idx] = params[idx]; });
-                    md5Query = crypto.createHash('md5')
+		if (params) {
+			switch(method) {
+				case 'post':
+					var queryParams = {};
+					Object.keys(params).sort().forEach(function(idx) { queryParams[idx] = params[idx]; });
+					md5Query = crypto.createHash('md5')
 						.update(querystring.stringify(queryParams))
 						.digest('hex');
-                    options.form = queryParams;
+					options.form = queryParams;
 					options.method = 'POST';
-                    break;
-                case 'get':
-                    options.url += '?'+querystring.stringify(params);
-                    break;
-                case 'delete':
-                    options.url += '?'+querystring.stringify(params);
+					break;
+				case 'get':
+					options.url += '?'+querystring.stringify(params);
+					break;
+				case 'delete':
+					options.url += '?'+querystring.stringify(params);
 					options.method = 'DELETE';
-                    break;
-                default:
-                    var err = new Error('Method ' + method + ' not defined');
-                    self.emit('error', err);
+					break;
+				default:
 					return new Promise((resolve, reject) => {
+						let err = new Error('Method ' + method + ' not defined');
+						self.emit('error', err);
 						reject(err)
 					});
-            }
-        }
+			}
+		}
 
-        var signature = crypto.createHmac('sha256', config.secret)
+		var signature = crypto.createHmac('sha256', config.secret)
 			.update([method.toUpperCase(), options.url, config.key, nonce, md5Query].join('#'))
 			.digest('hex');
 
-        options.headers = {
-            'User-Agent'     : config.agent,
-            'X-API-KEY'      : config.key,
-            'X-API-NONCE'    : nonce,
-            'X-API-SIGNATURE': signature
-        };
+		options.headers = {
+			'User-Agent'     : config.agent,
+			'X-API-KEY'      : config.key,
+			'X-API-NONCE'    : nonce,
+			'X-API-SIGNATURE': signature
+		};
 
 		return new Promise((resolve, reject) => {
 			requestPromise(options)
@@ -135,32 +135,32 @@ function BitcoindeClient(settings) {
 				});
 
 		});
-    }; // rawRequest
+	}; // rawRequest
 
-    /**
-     * Nonce generator
-     */
-    var noncer = new (function() {
+	/**
+	 * Nonce generator
+	 */
+	var noncer = new (function() {
 
-        // if you call Date.now() too fast it will generate
-        // the same ms, helper to make sure the nonce is
-        // truly unique (supports up to 999 calls per ms).
-        this.generate = function() {
+		// if you call Date.now() too fast it will generate
+		// the same ms, helper to make sure the nonce is
+		// truly unique (supports up to 999 calls per ms).
+		this.generate = function() {
 
-            var now = Date.now();
+			var now = Date.now();
 
-            this.counter = (now === this.last? this.counter + 1 : 0);
-            this.last    = now;
+			this.counter = (now === this.last? this.counter + 1 : 0);
+			this.last    = now;
 
-            // add padding to nonce
-            var padding =
-                this.counter < 10 ? '000' :
-                    this.counter < 100 ? '00' :
-                        this.counter < 1000 ?  '0' : '';
+			// add padding to nonce
+			var padding =
+				this.counter < 10 ? '000' :
+					this.counter < 100 ? '00' :
+						this.counter < 1000 ?  '0' : '';
 
-            return now+padding+this.counter;
-        };
-    })();
+			return now + padding + this.counter;
+		};
+	})();
 };
 
 util.inherits(BitcoindeClient, events.EventEmitter);
