@@ -1,66 +1,64 @@
-var util        = require('util');
-var events      = require('events');
-var crypto      = require('crypto');
-var extend      = require('util-extend');
-var request     = require('request');
-var querystring = require('querystring');
+'use strict';
+const util           = require('util');
+const events         = require('events');
+const crypto         = require('crypto');
+const extend         = require('util-extend');
+const requestPromise = require('request-promise-native');
+const querystring    = require('querystring');
 
 /**
  * BitcoindeClient connects to the bitcoin.de API
  * @param {object} settings Object required keys "key" and "secret"
  */
 function BitcoindeClient(settings) {
-    var self = this;
+	var self = this;
 
-    var config_default = {
-        url: 'https://api.bitcoin.de',
-        version: 'v2',
-        agent: 'Bitcoin.de NodeJS API Client',
-        timeoutMS: 20000
-    };
-    var config = extend(config_default, settings);
-    if (!config.key) self.emit('error', new Error('required settings "key" is missing'));
-    if (!config.secret) self.emit('error', new Error('required settings "secret" is missing'));
+	let config_default = {
+		url: 'https://api.bitcoin.de',
+		version: 'v2',
+		agent: 'Bitcoin.de NodeJS API Client',
+		timeoutMS: 20000
+	};
+	let config = extend(config_default, settings);
+	if (!config.key) self.emit('error', new Error('required settings "key" is missing'));
+	if (!config.secret) self.emit('error', new Error('required settings "secret" is missing'));
 
     /**
      * Initialize necessary properties from EventEmitter
      */
-     events.EventEmitter.call(self);
+	events.EventEmitter.call(self);
 
     /**
      * Perform GET API request
      * @param  {String}   method   API method
      * @param  {Object}   params   Arguments to pass to the api call
-     * @param  {Function} callback A callback function to be executed when the request is complete
      * @return {Object}            The request object
      */
-    self.get = function(method, params, callback) {
-        var url = config.url+'/'+config.version+'/'+method;
-        return rawRequest('get', url, params, callback);
-    };
+	self.get = function(method, params) {
+		var url = config.url+'/'+config.version+'/'+method;
+		return rawRequest('get', url, params);
+	};
 
     /**
      * Perform POST API request
      * @param  {String}   method   API method
      * @param  {Object}   params   Arguments to pass to the api call
-     * @param  {Function} callback A callback function to be executed when the request is complete
      * @return {Object}            The request object
      */
-    self.post = function(method, params, callback) {
+    self.post = function(method, params) {
         var url = config.url+'/'+config.version+'/'+method;
-        return rawRequest('post', url, params, callback);
+        return rawRequest('post', url, params);
     };
 
     /**
      * Perform DELETE API request
      * @param  {String}   method   API method
      * @param  {Object}   params   Arguments to pass to the api call
-     * @param  {Function} callback A callback function to be executed when the request is complete
      * @return {Object}            The request object
      */
-    self.delete = function(method, params, callback) {
+    self.delete = function(method, params) {
         var url = config.url+'/'+config.version+'/'+method;
-        return rawRequest('del', url, params, callback);
+        return rawRequest('delete', url, params);
     };
 
     /**
@@ -68,17 +66,17 @@ function BitcoindeClient(settings) {
      * @param  {String}   method   HTTP method
      * @param  {String}   url      URL to request
      * @param  {Object}   params   POST body
-     * @param  {Function} callback A callback function to call when the request is complete
      * @return {Object}            The request object
      */
-    var rawRequest = function(method, url, params, callback) {
+	var rawRequest = function(method, url, params) {
 
-        var nonce    = noncer.generate();
-            md5Query = 'd41d8cd98f00b204e9800998ecf8427e', // empty string hash
-            options  = {
-                url: url,
-                timeout: config.timeoutMS
-            };
+		let nonce    = noncer.generate();
+		let md5Query = 'd41d8cd98f00b204e9800998ecf8427e'; // empty string hash
+		let options  = {
+			url: url,
+			timeout: config.timeoutMS,
+			json: true
+		};
 
         if(params) {
             switch(method) {
@@ -87,20 +85,26 @@ function BitcoindeClient(settings) {
                     Object.keys(params).sort().forEach(function(idx) { queryParams[idx] = params[idx]; });
                     md5Query = crypto.createHash('md5').update(querystring.stringify(queryParams)).digest('hex');
                     options.form = queryParams;
+					options.method = 'POST';
                     break;
                 case 'get':
-                case 'del':
                     options.url += '?'+querystring.stringify(params);
                     break;
+                case 'delete':
+                    options.url += '?'+querystring.stringify(params);
+					options.method = 'DELETE';
+                    break;
                 default:
-                    var err = new Error(method+' not defined');
+                    var err = new Error('Method ' +method+ ' not defined');
                     self.emit('error', err);
-                    return (typeof callback === 'function'? callback.call(self, err, null) : null);
+					return new Promise((resolve, reject) => {
+						reject(err)
+					});
             }
         }
 
         var signature = crypto.createHmac('sha256', config.secret).update(
-            (method == 'del'? 'DELETE' : method.toUpperCase())+'#'+options.url+'#'+config.key+'#'+nonce+'#'+md5Query
+            method.toUpperCase()+'#'+options.url+'#'+config.key+'#'+nonce+'#'+md5Query
         ).digest('hex');
 
         options.headers = {
@@ -110,36 +114,26 @@ function BitcoindeClient(settings) {
             'X-API-SIGNATURE': signature
         };
 
-        var req = request[method](options, function(error, response, body) {
-            if(typeof callback === 'function') {
-                var data, err;
+		return new Promise((resolve, reject) => {
+			requestPromise(options)
+				.then((data) => {
+					if(data.errors && data.errors.length) {
+						// can we do something better with data.errors?
+						err = new Error('Bitcoin.de API returned error: '+data.errors[0].message);
+						self.emit('error', err);
+						reject(err)
+					} else {
+						resolve(data)
+					}
+				})
+				.catch((error) => {
+					err = new Error('Error in server response: '+JSON.stringify(error));
+					self.emit('error', err);
+					reject(err)
+				});
 
-                if(error) {
-                    err = new Error('Error in server response: '+JSON.stringify(error));
-                    self.emit('error', err);
-                    return callback.call(self, err, null);
-                }
-
-                try {
-                    data = JSON.parse(body);
-                } catch(e) {
-                    err = new Error('Could not understand response from server: '+body);
-                    self.emit('error', err);
-                    return callback.call(self, err, null);
-                }
-
-                if(data.errors && data.errors.length) {
-                    err = new Error('Bitcoin.de API returned error: '+data.errors[0].message);
-                    self.emit('error', err);
-                    return callback.call(self, err, data.errors);
-                } else {
-                    return callback.call(self, null, data);
-                }
-            }
-        });
-
-        return req;
-    };
+		});
+    }; // rawRequest
 
     /**
      * Nonce generator
