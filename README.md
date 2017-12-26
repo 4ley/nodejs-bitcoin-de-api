@@ -9,7 +9,7 @@ The [original version](https://github.com/4ley/nodejs-bitcoin-de-api) is by @4le
 ## Installation
 
 ```
-npm install bitcoinde-api
+npm install neuhaus/nodejs-bitcoin-de-api
 ```
 
 ## Example Usage
