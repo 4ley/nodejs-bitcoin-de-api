@@ -18,22 +18,22 @@ var bitcoinde = new BitcoindeClient({
 });
 
 // Orderbook
-bitcoinde.get('orders', { type: 'sell' }, function(error, result) {
-    if(error) {
-        console.error(error);
-    } else {
+bitcoinde.get('orders', { type: 'sell' })
+	.then((result) => {
         console.log(result.orders);
-    }
-});
+	})
+	.catch((error) => {
+        console.error(error);
+    });
 
 // Account Info
-bitcoinde.get('account', null, function(error, result) {
-    if(error) {
-        console.error(error);
-    } else {
+bitcoinde.get('account', null)
+	.then((result) => {
         console.log(result.data);
-    }
-});
+	})
+	.catch((error) => {
+        console.error(error);
+	});
 
 // Catch Error Event
 bitcoinde.on('error', function(error) {
