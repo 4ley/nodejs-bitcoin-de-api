@@ -1,7 +1,7 @@
 {
   "name": "bitcoinde-api",
   "version": "2.0.0",
-  "description": "NodeJS Client Library for the bitcoin.de Trading API",
+  "description": "NodeJS client library with Promises for the bitcoin.de Trading API v2",
   "keywords": [
     "bitcoin.de",
     "bitcoin",
@@ -16,21 +16,21 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "querystring": "^0.2.0",
-    "request": "^2.83.0",
-    "request-promise-native": "^1.0.5",
-    "util-extend": "^1.0.3"
+    "query-string": ">=5.0.1",
+    "request": ">=2.83.0",
+    "request-promise-native": ">=1.0.5",
+    "util-extend": ">=1.0.3"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/4ley/nodejs-bitcoin-de-api"
+    "url": "https://github.com/neuhaus/nodejs-bitcoin-de-api"
   },
   "main": "index.js",
   "engines": {
-    "node": ">=0.10"
+    "node": ">=4.8.7"
   },
   "bugs": {
-    "url": "https://github.com/4ley/nodejs-bitcoin-de-api/issues"
+    "url": "https://github.com/neuhaus/nodejs-bitcoin-de-api/issues"
   },
   "readmeFilename": "README.md"
 }

@@ -4,7 +4,7 @@ const events         = require('events');
 const crypto         = require('crypto');
 const extend         = require('util-extend');
 const requestPromise = require('request-promise-native');
-const querystring    = require('querystring');
+const querystring    = require('query-string'); // sorts keys during stringify
 
 /**
  * BitcoindeClient connects to the bitcoin.de API
@@ -14,13 +14,13 @@ function BitcoindeClient(settings) {
 	var self = this;
 
 	let config_default = {
-		url: 'https://api.bitcoin.de',
-		version: 'v2',
-		agent: 'Bitcoin.de NodeJS API Client',
+		url:       'https://api.bitcoin.de',
+		version:   'v2',
+		agent:     'Bitcoin.de NodeJS API Client',
 		timeoutMS: 20000
 	};
 	let config = extend(config_default, settings);
-	if (!config.key) self.emit('error', new Error('required settings "key" is missing'));
+	if (!config.key)    self.emit('error', new Error('required settings "key" is missing'));
 	if (!config.secret) self.emit('error', new Error('required settings "secret" is missing'));
 
 	/**
@@ -30,34 +30,34 @@ function BitcoindeClient(settings) {
 
 	/**
 	 * Perform GET API request
-	 * @param  {String}   method   API method
+	 * @param  {String}   action   API action
 	 * @param  {Object}   params   Arguments to pass to the api call
 	 * @return {Object}            The request object
 	 */
-	self.get = function(method, params) {
-		var url = config.url+'/'+config.version+'/'+method;
+	self.get = function(action, params) {
+		let url = config.url+'/'+config.version+'/'+action;
 		return rawRequest('get', url, params);
 	};
 
 	/**
 	 * Perform POST API request
-	 * @param  {String}   method   API method
+	 * @param  {String}   action   API action
 	 * @param  {Object}   params   Arguments to pass to the api call
 	 * @return {Object}            The request object
 	 */
-	self.post = function(method, params) {
-		var url = config.url+'/'+config.version+'/'+method;
+	self.post = function(action, params) {
+		let url = config.url+'/'+config.version+'/'+action;
 		return rawRequest('post', url, params);
 	};
 
 	/**
 	 * Perform DELETE API request
-	 * @param  {String}   method   API method
+	 * @param  {String}   action   API action
 	 * @param  {Object}   params   Arguments to pass to the api call
 	 * @return {Object}            The request object
 	 */
-	self.delete = function(method, params) {
-		var url = config.url+'/'+config.version+'/'+method;
+	self.delete = function(action, params) {
+		let url = config.url+'/'+config.version+'/'+action;
 		return rawRequest('delete', url, params);
 	};
 
@@ -65,10 +65,10 @@ function BitcoindeClient(settings) {
 	 * Send the actual HTTP request
 	 * @param  {String}   method   HTTP method
 	 * @param  {String}   url      URL to request
-	 * @param  {Object}   params   POST body
+	 * @param  {Object}   params   POST body or Querystring
 	 * @return {Object}            The request object
 	 */
-	var rawRequest = function(method, url, params) {
+	let rawRequest = function(method, url, params) {
 
 		let nonce    = noncer.generate();
 		let md5Query = 'd41d8cd98f00b204e9800998ecf8427e'; // empty string hash
@@ -81,10 +81,8 @@ function BitcoindeClient(settings) {
 		if (params) {
 			switch(method) {
 				case 'post':
-					var queryParams = {};
-					Object.keys(params).sort().forEach(function(idx) { queryParams[idx] = params[idx]; });
 					md5Query = crypto.createHash('md5')
-						.update(querystring.stringify(queryParams))
+						.update(querystring.stringify(params))
 						.digest('hex');
 					options.form = queryParams;
 					options.method = 'POST';
@@ -105,7 +103,7 @@ function BitcoindeClient(settings) {
 			}
 		}
 
-		var signature = crypto.createHmac('sha256', config.secret)
+		let signature = crypto.createHmac('sha256', config.secret)
 			.update([method.toUpperCase(), options.url, config.key, nonce, md5Query].join('#'))
 			.digest('hex');
 
@@ -140,20 +138,20 @@ function BitcoindeClient(settings) {
 	/**
 	 * Nonce generator
 	 */
-	var noncer = new (function() {
+	let noncer = new (function() {
 
 		// if you call Date.now() too fast it will generate
 		// the same ms, helper to make sure the nonce is
 		// truly unique (supports up to 999 calls per ms).
 		this.generate = function() {
 
-			var now = Date.now();
+			let now = Date.now();
 
 			this.counter = (now === this.last? this.counter + 1 : 0);
 			this.last    = now;
 
 			// add padding to nonce
-			var padding =
+			let padding =
 				this.counter < 10 ? '000' :
 					this.counter < 100 ? '00' :
 						this.counter < 1000 ?  '0' : '';
