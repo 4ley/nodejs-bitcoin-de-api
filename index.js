@@ -1,25 +1,26 @@
 var util        = require('util');
 var events      = require('events');
 var crypto      = require('crypto');
+var extend      = require('util-extend');
 var request     = require('request');
 var querystring = require('querystring');
 
 /**
  * BitcoindeClient connects to the bitcoin.de API
- * @param {String} key    API Key
- * @param {String} secret API Secret
+ * @param {object} settings Object required keys "key" and "secret"
  */
-function BitcoindeClient(key, secret) {
+function BitcoindeClient(settings) {
     var self = this;
 
-    var config = {
+    var config_default = {
         url: 'https://api.bitcoin.de',
-        version: 'v1',
+        version: 'v2',
         agent: 'Bitcoin.de NodeJS API Client',
-        key: key,
-        secret: secret,
         timeoutMS: 20000
     };
+    var config = extend(config_default, settings);
+    if (!config.key) self.emit('error', new Error('required settings "key" is missing'));
+    if (!config.secret) self.emit('error', new Error('required settings "secret" is missing'));
 
     /**
      * Initialize necessary properties from EventEmitter
@@ -156,8 +157,8 @@ function BitcoindeClient(key, secret) {
             this.last    = now;
 
             // add padding to nonce
-            var padding = 
-                this.counter < 10 ? '000' : 
+            var padding =
+                this.counter < 10 ? '000' :
                     this.counter < 100 ? '00' :
                         this.counter < 1000 ?  '0' : '';
 

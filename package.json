@@ -1,6 +1,6 @@
 {
   "name": "bitcoinde-api",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "NodeJS Client Library for the bitcoin.de Trading API",
   "keywords": [
     "bitcoin.de",
@@ -11,11 +11,13 @@
   ],
   "author": "Aley R. (https://github.com/4ley)",
   "contributors": [
+    "Alexander Wunschik <dev@wunschik.net>"
   ],
   "license": "MIT",
   "dependencies": {
     "querystring": ">=0.2.0",
-    "request": ">=2.27.0"
+    "request": ">=2.27.0",
+    "util-extend": "^1.0.3"
   },
   "repository": {
     "type": "git",
