@@ -23,14 +23,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/neuhaus/nodejs-bitcoin-de-api"
+    "url": "https://github.com/4ley/nodejs-bitcoin-de-api"
   },
   "main": "index.js",
   "engines": {
     "node": ">=4.8.7"
   },
   "bugs": {
-    "url": "https://github.com/neuhaus/nodejs-bitcoin-de-api/issues"
+    "url": "https://github.com/4ley/nodejs-bitcoin-de-api/issues"
   },
   "readmeFilename": "README.md"
 }
