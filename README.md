@@ -13,27 +13,27 @@ npm install bitcoinde-api
 ```javascript
 var BitcoindeClient = require('bitcoinde-api');
 var bitcoinde = new BitcoindeClient({
-  key: 'api_key',
-  secret: 'api_secret'
+    key: 'api_key',
+    secret: 'api_secret'
 });
 
 // Orderbook
-bitcoinde.get('orders', { type: 'sell' }, function(error, result) {
-    if(error) {
-        console.error(error);
-    } else {
+bitcoinde.get('orders', { type: 'sell' })
+    .then((result) => {
         console.log(result.orders);
-    }
-});
+    })
+    .catch((error) => {
+        console.error(error);
+    });
 
 // Account Info
-bitcoinde.get('account', null, function(error, result) {
-    if(error) {
-        console.error(error);
-    } else {
+bitcoinde.get('account', null)
+    .then((result) => {
         console.log(result.data);
-    }
-});
+    })
+    .catch((error) => {
+        console.error(error);
+    });
 
 // Catch Error Event
 bitcoinde.on('error', function(error) {
