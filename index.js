@@ -77,21 +77,22 @@ function BitcoindeClient(settings) {
 			timeout: config.timeoutMS,
 			json: true
 		};
-
+		let queryParams = querystring.stringify(params);
+		
 		if (params) {
 			switch(method) {
 				case 'post':
 					md5Query = crypto.createHash('md5')
-						.update(querystring.stringify(params))
+						.update(queryParams)
 						.digest('hex');
 					options.form = queryParams;
 					options.method = 'POST';
 					break;
 				case 'get':
-					options.url += '?'+querystring.stringify(params);
+					options.url += '?'+queryParams;
 					break;
 				case 'delete':
-					options.url += '?'+querystring.stringify(params);
+					options.url += '?'+queryParams;
 					options.method = 'DELETE';
 					break;
 				default:
